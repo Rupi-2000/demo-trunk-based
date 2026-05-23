@@ -7,6 +7,7 @@ def _row_to_task(row) -> Task:
         id=row["id"],
         title=row["title"],
         description=row["description"],
+        priority=row["priority"],
         done=bool(row["done"]),
     )
 
@@ -14,11 +15,11 @@ def _row_to_task(row) -> Task:
 def create_task(task: TaskCreate) -> Task:
     with get_connection() as connection:
         cursor = connection.execute(
-            "INSERT INTO tasks (title, description) VALUES (?, ?)",
-            (task.title, task.description),
+            "INSERT INTO tasks (title, description, priority) VALUES (?, ?, ?)",
+            (task.title, task.description, task.priority),
         )
         row = connection.execute(
-            "SELECT id, title, description, done FROM tasks WHERE id = ?",
+            "SELECT id, title, description, priority, done FROM tasks WHERE id = ?",
             (cursor.lastrowid,),
         ).fetchone()
 
@@ -26,7 +27,7 @@ def create_task(task: TaskCreate) -> Task:
 
 
 def list_tasks(open_only: bool = False) -> list[Task]:
-    query = "SELECT id, title, description, done FROM tasks"
+    query = "SELECT id, title, description, priority, done FROM tasks"
     params = ()
 
     if open_only:
@@ -45,7 +46,7 @@ def complete_task(task_id: int) -> Task | None:
     with get_connection() as connection:
         connection.execute("UPDATE tasks SET done = 1 WHERE id = ?", (task_id,))
         row = connection.execute(
-            "SELECT id, title, description, done FROM tasks WHERE id = ?",
+            "SELECT id, title, description, priority, done FROM tasks WHERE id = ?",
             (task_id,),
         ).fetchone()
 
@@ -53,4 +54,3 @@ def complete_task(task_id: int) -> Task | None:
         return None
 
     return _row_to_task(row)
-

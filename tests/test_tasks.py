@@ -13,12 +13,25 @@ def database(tmp_path: Path) -> None:
 
 
 def test_create_task() -> None:
-    task = create_task(TaskCreate(title="Write demo", description="Prepare repository"))
+    task = create_task(
+        TaskCreate(
+            title="Write demo",
+            description="Prepare repository",
+            priority="high",
+        )
+    )
 
     assert task.id == 1
     assert task.title == "Write demo"
     assert task.description == "Prepare repository"
+    assert task.priority == "high"
     assert task.done is False
+
+
+def test_create_task_uses_normal_priority_by_default() -> None:
+    task = create_task(TaskCreate(title="Default priority"))
+
+    assert task.priority == "normal"
 
 
 def test_complete_task() -> None:
@@ -38,4 +51,3 @@ def test_list_open_tasks_excludes_completed_tasks() -> None:
     open_tasks = list_tasks(open_only=True)
 
     assert [task.id for task in open_tasks] == [first.id]
-
