@@ -94,3 +94,34 @@ def test_invalid_task_status_returns_422(client: TestClient) -> None:
     )
 
     assert response.status_code == 422
+
+
+def test_user_api_flow(client: TestClient) -> None:
+    create_response = client.post(
+        "/users",
+        json={"name": "Ada Lovelace", "email": "ada@example.com"},
+    )
+
+    assert create_response.status_code == 201
+    created = create_response.json()
+    assert created["name"] == "Ada Lovelace"
+    assert created["email"] == "ada@example.com"
+
+    lookup_response = client.get("/users/ada@example.com")
+
+    assert lookup_response.status_code == 200
+    assert lookup_response.json() == created
+
+
+def test_duplicate_user_email_returns_409(client: TestClient) -> None:
+    client.post("/users", json={"name": "Ada", "email": "ada@example.com"})
+
+    response = client.post("/users", json={"name": "Other", "email": "ada@example.com"})
+
+    assert response.status_code == 409
+
+
+def test_unknown_user_returns_404(client: TestClient) -> None:
+    response = client.get("/users/missing@example.com")
+
+    assert response.status_code == 404

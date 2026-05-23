@@ -28,3 +28,14 @@ class Task(BaseModel):
     due_date: date | None
     status: TaskStatus
     done: bool
+
+
+class UserCreate(BaseModel):
+    name: str = Field(..., min_length=1)
+    email: str = Field(..., min_length=3)
+
+
+class User(BaseModel):
+    id: int
+    name: str
+    email: str
