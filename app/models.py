@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 
 
 TaskPriority = Literal["low", "normal", "high"]
+TaskStatus = Literal["open", "in_progress", "done"]
 
 
 class TaskCreate(BaseModel):
@@ -12,6 +13,11 @@ class TaskCreate(BaseModel):
     description: str = ""
     priority: TaskPriority = "normal"
     due_date: date | None = None
+    status: TaskStatus = "open"
+
+
+class TaskStatusUpdate(BaseModel):
+    status: TaskStatus
 
 
 class Task(BaseModel):
@@ -20,4 +26,5 @@ class Task(BaseModel):
     description: str
     priority: TaskPriority
     due_date: date | None
+    status: TaskStatus
     done: bool

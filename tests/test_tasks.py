@@ -28,6 +28,7 @@ def test_create_task() -> None:
     assert task.description == "Prepare repository"
     assert task.priority == "high"
     assert task.due_date == date(2026, 6, 15)
+    assert task.status == "open"
     assert task.done is False
 
 
@@ -50,6 +51,14 @@ def test_complete_task() -> None:
 
     assert completed is not None
     assert completed.done is True
+    assert completed.status == "done"
+
+
+def test_create_done_task_marks_task_as_done() -> None:
+    task = create_task(TaskCreate(title="Done task", status="done"))
+
+    assert task.status == "done"
+    assert task.done is True
 
 
 def test_list_open_tasks_excludes_completed_tasks() -> None:
