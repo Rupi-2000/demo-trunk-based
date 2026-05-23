@@ -29,6 +29,7 @@ def init_db() -> None:
                 priority TEXT NOT NULL DEFAULT 'normal',
                 due_date TEXT,
                 status TEXT NOT NULL DEFAULT 'open',
+                assigned_to TEXT,
                 done INTEGER NOT NULL DEFAULT 0
             )
             """
@@ -61,3 +62,6 @@ def init_db() -> None:
             connection.execute(
                 "ALTER TABLE tasks ADD COLUMN status TEXT NOT NULL DEFAULT 'open'"
             )
+
+        if "assigned_to" not in task_columns:
+            connection.execute("ALTER TABLE tasks ADD COLUMN assigned_to TEXT")

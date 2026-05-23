@@ -31,6 +31,7 @@ def test_task_api_flow(client: TestClient) -> None:
     assert created["priority"] == "high"
     assert created["due_date"] == "2026-06-15"
     assert created["status"] == "open"
+    assert created["assigned_to"] is None
     assert created["done"] is False
 
     complete_response = client.patch(f"/tasks/{created['id']}/complete")
@@ -123,5 +124,31 @@ def test_duplicate_user_email_returns_409(client: TestClient) -> None:
 
 def test_unknown_user_returns_404(client: TestClient) -> None:
     response = client.get("/users/missing@example.com")
+
+    assert response.status_code == 404
+
+
+def test_task_assignment_api_flow(client: TestClient) -> None:
+    client.post("/users", json={"name": "Ada Lovelace", "email": "ada@example.com"})
+    task_response = client.post("/tasks", json={"title": "Assigned task"})
+    task = task_response.json()
+
+    assign_response = client.patch(
+        f"/tasks/{task['id']}/assign",
+        json={"email": "ada@example.com"},
+    )
+
+    assert assign_response.status_code == 200
+    assert assign_response.json()["assigned_to"] == "ada@example.com"
+
+
+def test_assigning_task_to_unknown_user_returns_404(client: TestClient) -> None:
+    task_response = client.post("/tasks", json={"title": "Unassigned task"})
+    task = task_response.json()
+
+    response = client.patch(
+        f"/tasks/{task['id']}/assign",
+        json={"email": "missing@example.com"},
+    )
 
     assert response.status_code == 404

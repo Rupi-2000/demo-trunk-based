@@ -5,7 +5,7 @@ import pytest
 
 from app.database import configure_database
 from app.models import TaskCreate
-from app.task_service import complete_task, create_task, list_tasks
+from app.task_service import assign_task, complete_task, create_task, list_tasks
 
 
 @pytest.fixture(autouse=True)
@@ -29,6 +29,7 @@ def test_create_task() -> None:
     assert task.priority == "high"
     assert task.due_date == date(2026, 6, 15)
     assert task.status == "open"
+    assert task.assigned_to is None
     assert task.done is False
 
 
@@ -59,6 +60,15 @@ def test_create_done_task_marks_task_as_done() -> None:
 
     assert task.status == "done"
     assert task.done is True
+
+
+def test_assign_task() -> None:
+    task = create_task(TaskCreate(title="Assigned task"))
+
+    assigned = assign_task(task.id, "ada@example.com")
+
+    assert assigned is not None
+    assert assigned.assigned_to == "ada@example.com"
 
 
 def test_list_open_tasks_excludes_completed_tasks() -> None:

@@ -5,8 +5,14 @@ import sqlite3
 from fastapi import FastAPI, HTTPException
 
 from app.database import init_db
-from app.models import Task, TaskCreate, TaskStatusUpdate, User, UserCreate
-from app.task_service import complete_task, create_task, list_tasks, update_task_status
+from app.models import Task, TaskAssignment, TaskCreate, TaskStatusUpdate, User, UserCreate
+from app.task_service import (
+    assign_task,
+    complete_task,
+    create_task,
+    list_tasks,
+    update_task_status,
+)
 from app.user_service import create_user, find_user_by_email
 from app.version import APP_VERSION
 
@@ -53,6 +59,21 @@ def patch_task_complete(task_id: int) -> Task:
 @app.patch("/tasks/{task_id}/status", response_model=Task)
 def patch_task_status(task_id: int, update: TaskStatusUpdate) -> Task:
     task = update_task_status(task_id, update.status)
+
+    if task is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    return task
+
+
+@app.patch("/tasks/{task_id}/assign", response_model=Task)
+def patch_task_assignment(task_id: int, assignment: TaskAssignment) -> Task:
+    user = find_user_by_email(assignment.email)
+
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    task = assign_task(task_id, assignment.email)
 
     if task is None:
         raise HTTPException(status_code=404, detail="Task not found")
