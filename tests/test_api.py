@@ -18,11 +18,16 @@ def client(tmp_path: Path) -> TestClient:
 def test_task_api_flow(client: TestClient) -> None:
     create_response = client.post(
         "/tasks",
-        json={"title": "API task", "description": "Created through HTTP"},
+        json={
+            "title": "API task",
+            "description": "Created through HTTP",
+            "priority": "high",
+        },
     )
 
     assert create_response.status_code == 201
     created = create_response.json()
+    assert created["priority"] == "high"
     assert created["done"] is False
 
     complete_response = client.patch(f"/tasks/{created['id']}/complete")
@@ -41,3 +46,11 @@ def test_complete_unknown_task_returns_404(client: TestClient) -> None:
 
     assert response.status_code == 404
 
+
+def test_invalid_task_priority_returns_422(client: TestClient) -> None:
+    response = client.post(
+        "/tasks",
+        json={"title": "Invalid priority", "priority": "urgent"},
+    )
+
+    assert response.status_code == 422

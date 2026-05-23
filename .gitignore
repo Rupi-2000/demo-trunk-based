@@ -1,6 +1,8 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
+.pytest_tmp/
+.pytest_user_tmp/
 .venv/
 venv/
 app.db
@@ -8,4 +10,3 @@ app.db
 .coverage
 htmlcov/
 .env
-
