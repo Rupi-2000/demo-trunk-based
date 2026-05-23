@@ -27,6 +27,7 @@ def init_db() -> None:
                 title TEXT NOT NULL,
                 description TEXT NOT NULL DEFAULT '',
                 priority TEXT NOT NULL DEFAULT 'normal',
+                due_date TEXT,
                 done INTEGER NOT NULL DEFAULT 0
             )
             """
@@ -41,3 +42,6 @@ def init_db() -> None:
             connection.execute(
                 "ALTER TABLE tasks ADD COLUMN priority TEXT NOT NULL DEFAULT 'normal'"
             )
+
+        if "due_date" not in columns:
+            connection.execute("ALTER TABLE tasks ADD COLUMN due_date TEXT")

@@ -1,4 +1,5 @@
 from pathlib import Path
+from datetime import date
 
 import pytest
 
@@ -18,6 +19,7 @@ def test_create_task() -> None:
             title="Write demo",
             description="Prepare repository",
             priority="high",
+            due_date="2026-06-15",
         )
     )
 
@@ -25,6 +27,7 @@ def test_create_task() -> None:
     assert task.title == "Write demo"
     assert task.description == "Prepare repository"
     assert task.priority == "high"
+    assert task.due_date == date(2026, 6, 15)
     assert task.done is False
 
 
@@ -32,6 +35,12 @@ def test_create_task_uses_normal_priority_by_default() -> None:
     task = create_task(TaskCreate(title="Default priority"))
 
     assert task.priority == "normal"
+
+
+def test_create_task_due_date_is_optional() -> None:
+    task = create_task(TaskCreate(title="No due date"))
+
+    assert task.due_date is None
 
 
 def test_complete_task() -> None:
