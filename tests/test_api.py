@@ -30,12 +30,14 @@ def test_task_api_flow(client: TestClient) -> None:
     created = create_response.json()
     assert created["priority"] == "high"
     assert created["due_date"] == "2026-06-15"
+    assert created["status"] == "open"
     assert created["done"] is False
 
     complete_response = client.patch(f"/tasks/{created['id']}/complete")
 
     assert complete_response.status_code == 200
     assert complete_response.json()["done"] is True
+    assert complete_response.json()["status"] == "done"
 
     open_response = client.get("/tasks/open")
 
@@ -62,6 +64,33 @@ def test_invalid_due_date_returns_422(client: TestClient) -> None:
     response = client.post(
         "/tasks",
         json={"title": "Invalid due date", "due_date": "15.06.2026"},
+    )
+
+    assert response.status_code == 422
+
+
+def test_update_task_status(client: TestClient) -> None:
+    create_response = client.post("/tasks", json={"title": "Status task"})
+    created = create_response.json()
+
+    status_response = client.patch(
+        f"/tasks/{created['id']}/status",
+        json={"status": "in_progress"},
+    )
+
+    assert status_response.status_code == 200
+    updated = status_response.json()
+    assert updated["status"] == "in_progress"
+    assert updated["done"] is False
+
+
+def test_invalid_task_status_returns_422(client: TestClient) -> None:
+    create_response = client.post("/tasks", json={"title": "Invalid status task"})
+    created = create_response.json()
+
+    response = client.patch(
+        f"/tasks/{created['id']}/status",
+        json={"status": "blocked"},
     )
 
     assert response.status_code == 422

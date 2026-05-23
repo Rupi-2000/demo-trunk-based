@@ -3,8 +3,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 
 from app.database import init_db
-from app.models import Task, TaskCreate
-from app.task_service import complete_task, create_task, list_tasks
+from app.models import Task, TaskCreate, TaskStatusUpdate
+from app.task_service import complete_task, create_task, list_tasks, update_task_status
 from app.version import APP_VERSION
 
 
@@ -40,6 +40,16 @@ def get_open_tasks() -> list[Task]:
 @app.patch("/tasks/{task_id}/complete", response_model=Task)
 def patch_task_complete(task_id: int) -> Task:
     task = complete_task(task_id)
+
+    if task is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    return task
+
+
+@app.patch("/tasks/{task_id}/status", response_model=Task)
+def patch_task_status(task_id: int, update: TaskStatusUpdate) -> Task:
+    task = update_task_status(task_id, update.status)
 
     if task is None:
         raise HTTPException(status_code=404, detail="Task not found")
