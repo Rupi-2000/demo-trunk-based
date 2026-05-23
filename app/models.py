@@ -11,7 +11,7 @@ TaskStatus = Literal["open", "in_progress", "done"]
 class TaskCreate(BaseModel):
     title: str = Field(..., min_length=1)
     description: str = ""
-    priority: TaskPriority = "normal"
+    priority: TaskPriority = "low"
     due_date: date | None = None
     status: TaskStatus = "open"
 

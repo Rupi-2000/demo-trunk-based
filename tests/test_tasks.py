@@ -33,10 +33,10 @@ def test_create_task() -> None:
     assert task.done is False
 
 
-def test_create_task_uses_normal_priority_by_default() -> None:
+def test_create_task_uses_low_priority_by_default() -> None:
     task = create_task(TaskCreate(title="Default priority"))
 
-    assert task.priority == "normal"
+    assert task.priority == "low"
 
 
 def test_create_task_due_date_is_optional() -> None:
