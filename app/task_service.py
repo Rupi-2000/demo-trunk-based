@@ -54,8 +54,8 @@ def list_tasks(open_only: bool = False) -> list[Task]:
     params = ()
 
     if open_only:
-        query += " WHERE done = ?"
-        params = (0,)
+        query += " WHERE done = ? AND status != ?"
+        params = (0, "done")
 
     query += " ORDER BY id"
 

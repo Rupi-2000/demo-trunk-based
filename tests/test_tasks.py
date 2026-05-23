@@ -3,7 +3,7 @@ from datetime import date
 
 import pytest
 
-from app.database import configure_database
+from app.database import configure_database, get_connection
 from app.models import TaskCreate
 from app.task_service import assign_task, complete_task, create_task, list_tasks
 
@@ -75,6 +75,21 @@ def test_list_open_tasks_excludes_completed_tasks() -> None:
     first = create_task(TaskCreate(title="Open task"))
     second = create_task(TaskCreate(title="Completed task"))
     complete_task(second.id)
+
+    open_tasks = list_tasks(open_only=True)
+
+    assert [task.id for task in open_tasks] == [first.id]
+
+
+def test_list_open_tasks_excludes_legacy_done_status_tasks() -> None:
+    first = create_task(TaskCreate(title="Open task"))
+    legacy = create_task(TaskCreate(title="Legacy completed task"))
+
+    with get_connection() as connection:
+        connection.execute(
+            "UPDATE tasks SET status = 'done', done = 0 WHERE id = ?",
+            (legacy.id,),
+        )
 
     open_tasks = list_tasks(open_only=True)
 
