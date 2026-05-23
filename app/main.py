@@ -1,10 +1,13 @@
 from contextlib import asynccontextmanager
 
+import sqlite3
+
 from fastapi import FastAPI, HTTPException
 
 from app.database import init_db
-from app.models import Task, TaskCreate, TaskStatusUpdate
+from app.models import Task, TaskCreate, TaskStatusUpdate, User, UserCreate
 from app.task_service import complete_task, create_task, list_tasks, update_task_status
+from app.user_service import create_user, find_user_by_email
 from app.version import APP_VERSION
 
 
@@ -55,3 +58,21 @@ def patch_task_status(task_id: int, update: TaskStatusUpdate) -> Task:
         raise HTTPException(status_code=404, detail="Task not found")
 
     return task
+
+
+@app.post("/users", response_model=User, status_code=201)
+def post_user(user: UserCreate) -> User:
+    try:
+        return create_user(user)
+    except sqlite3.IntegrityError as exc:
+        raise HTTPException(status_code=409, detail="User already exists") from exc
+
+
+@app.get("/users/{email}", response_model=User)
+def get_user(email: str) -> User:
+    user = find_user_by_email(email)
+
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return user
